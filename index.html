@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WNET HTML</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: rgba(15, 15, 18, 0.7);
+            --accent: #ffffff;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body { 
+            background-color: var(--bg); 
+            color: #a1a1aa; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .glass {
+            background: var(--panel);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border);
+        }
+
+        .monaco-editor, .monaco-editor .margin, .monaco-editor-background {
+            background-color: transparent !important;
+        }
+
+        #preview-container {
+            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .tab-btn {
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <header class="h-16 flex items-center justify-between px-10 border-b border-white/[0.05] z-50">
+        <div class="flex items-center gap-12">
+            <div class="flex items-center gap-3">
+                <div class="h-6 w-6 bg-white rounded-full flex items-center justify-center">
+                    <div class="h-2 w-2 bg-black rotate-45"></div>
+                </div>
+                <h1 class="text-sm font-extrabold tracking-tighter text-white">WNET<span class="font-light opacity-40">COD</span></h1>
+            </div>
+            
+            <nav class="flex gap-8 items-center pt-1">
+                <button onclick="switchTab('html')" id="tab-html" class="tab-btn active text-[11px] font-bold uppercase tracking-widest">HTML</button>
+                <button onclick="switchTab('css')" id="tab-css" class="tab-btn text-[11px] font-bold uppercase tracking-widest opacity-50 hover:opacity-100">CSS</button>
+                <button onclick="switchTab('javascript')" id="tab-js" class="tab-btn text-[11px] font-bold uppercase tracking-widest opacity-50 hover:opacity-100">JS</button>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="selectAllCode()" class="text-[10px] font-bold px-4 py-2 border border-white/10 rounded-full hover:bg-white/10 transition-all">SELECIONAR TUDO</button>
+            <button onclick="clearAll()" class="text-[10px] font-bold px-4 py-2 border border-red-500/30 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all">LIMPAR</button>
+            <button onclick="importFile()" class="text-[10px] font-bold px-4 py-2 border border-white/10 rounded-full hover:bg-white hover:text-black transition-all">IMPORTAR</button>
+            <button onclick="saveToLocal()" class="text-[10px] font-bold px-4 py-2 border border-white/10 rounded-full hover:bg-white hover:text-black transition-all">SALVAR</button>
+            <button onclick="downloadBundle()" class="text-[10px] font-bold px-6 py-2 bg-white text-black rounded-full hover:scale-105 transition-all shadow-lg">EXPORTAR .HTML</button>
+            <input type="file" id="fileInput" class="hidden" accept=".html" onchange="handleImport(event)">
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden p-4 gap-4">
+        <section class="w-[45%] glass rounded-2xl flex flex-col p-2 overflow-hidden">
+            <div id="editor-container" class="flex-1 w-full"></div>
+            <div class="h-10 border-t border-white/5 flex items-center px-4 justify-between text-[9px] font-mono tracking-widest opacity-40 uppercase">
+                <span id="cursor-pos">Ln 1, Col 1</span>
+                <span>Direito reservado - WNET</span>
+            </div>
+        </section>
+
+        <section class="flex-1 flex flex-col gap-4">
+            <div class="flex items-center justify-between px-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em]">LIVE</span>
+                </div>
+                <div class="flex gap-4">
+                   <button onclick="setPreview('desktop')" class="opacity-40 hover:opacity-100 transition-opacity"><svg width="14" height="14" fill="white" viewBox="0 0 256 256"><path d="M208,40H48A24,24,0,0,0,24,64V160a24,24,0,0,0,24,24h64v16H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16H144V184h64a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40Z"></path></svg></button>
+                   <button onclick="setPreview('mobile')" class="opacity-40 hover:opacity-100 transition-opacity"><svg width="14" height="14" fill="white" viewBox="0 0 256 256"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16Z"></path></svg></button>
+                </div>
+            </div>
+            
+            <div id="preview-wrapper" class="flex-1 flex items-center justify-center overflow-hidden">
+                <div id="preview-container" class="w-full h-full">
+                    <iframe id="preview" class="w-full h-full border-none bg-white"></iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let editor, currentLang = 'html';
+        
+        let files = {
+            html: localStorage.getItem('wnet-html') || '<div class="container">\n  <h1>WNET COD</h1>\n  <p>O código agora executa em tempo real.</p>\n  <button id="btn">Testar Script</button>\n</div>',
+            css: localStorage.getItem('wnet-css') || 'body { background: #000; color: #fff; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; margin: 0; }\n.container { text-align: center; border: 1px solid #333; padding: 3rem; border-radius: 20px; background: #0a0a0a; }\nbutton { background: #fff; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }',
+            javascript: localStorage.getItem('wnet-js') || 'document.getElementById("btn").onclick = () => {\n  alert("Script funcionando!");\n};'
+        };
+
+        // Configuração de localização para Português
+        require.config({ 
+            paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' },
+            'vs/nls': { availableLanguages: { '*': 'pt-br' } } 
+        });
+
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: files[currentLang],
+                language: 'html',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                fontFamily: 'JetBrains Mono',
+                minimap: { enabled: false },
+                cursorBlinking: "smooth",
+                renderLineHighlight: "none",
+                contextmenu: true // Garante que o menu de contexto esteja ativo
+            });
+
+            editor.onDidChangeModelContent(() => {
+                files[currentLang] = editor.getValue();
+                updatePreview();
+            });
+
+            editor.onDidChangeCursorPosition(e => {
+                document.getElementById('cursor-pos').innerText = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+            });
+
+            setTimeout(updatePreview, 500);
+        });
+
+        function switchTab(lang) {
+            files[currentLang] = editor.getValue();
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'opacity-100');
+                b.classList.add('opacity-50');
+            });
+            const activeTabId = lang === 'javascript' ? 'tab-js' : `tab-${lang}`;
+            document.getElementById(activeTabId).classList.add('active', 'opacity-100');
+            monaco.editor.setModelLanguage(editor.getModel(), lang === 'javascript' ? 'javascript' : lang);
+            editor.setValue(files[lang]);
+        }
+
+        function updatePreview() {
+            const frame = document.getElementById('preview');
+            const source = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
+            const blob = new Blob([source], { type: 'text/html' });
+            frame.src = URL.createObjectURL(blob);
+        }
+
+        function setPreview(type) {
+            const container = document.getElementById('preview-container');
+            if(type === 'mobile') {
+                container.style.width = '375px';
+                container.style.height = '667px';
+                container.style.borderRadius = '30px';
+                container.style.border = '12px solid #1a1a1a';
+            } else {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                container.style.borderRadius = '12px';
+                container.style.border = 'none';
+            }
+        }
+
+        function saveToLocal() {
+            files[currentLang] = editor.getValue();
+            localStorage.setItem('wnet-html', files.html);
+            localStorage.setItem('wnet-css', files.css);
+            localStorage.setItem('wnet-js', files.javascript);
+            alert("Sincronizado no Navegador!");
+        }
+
+        function selectAllCode() {
+            if (editor) {
+                editor.focus();
+                const model = editor.getModel();
+                editor.setSelection(model.getFullModelRange());
+            }
+        }
+
+        function clearAll() {
+            if(confirm("Deseja limpar todos os campos? Esta ação não pode ser desfeita.")) {
+                files.html = "";
+                files.css = "";
+                files.javascript = "";
+                editor.setValue("");
+                updatePreview();
+            }
+        }
+
+        function importFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(content, 'text/html');
+                files.html = doc.body ? doc.body.innerHTML : "";
+                files.css = doc.querySelector('style') ? doc.querySelector('style').innerHTML : "";
+                files.javascript = doc.querySelector('script') ? doc.querySelector('script').innerHTML : "";
+                editor.setValue(files[currentLang]);
+                updatePreview();
+                alert("Projeto importado!");
+            };
+            reader.readAsText(file);
+        }
+
+        async function downloadBundle() {
+            files[currentLang] = editor.getValue();
+            const content = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
+            if ('showSaveFilePicker' in window) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: 'index.html',
+                        types: [{ description: 'Arquivo HTML', accept: { 'text/html': ['.html'] } }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                    return;
+                } catch (err) {}
+            }
+            const blob = new Blob([content], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'wnet_export.html';
+            a.click();
+        }
+    </script>
+</body>
+</html>
