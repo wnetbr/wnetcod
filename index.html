@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WNETStudio</title>
+    <title>WnetStudio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -252,9 +252,9 @@
         // Lógica do Sistema Original
         let editor, currentLang = 'html';
         let files = {
-            html: localStorage.getItem('wnet-html') || '<div class="container">\n  <h1>Design Apple</h1>\n  <p>Minimalismo e clareza.</p>\n  <button id="btn">Explorar</button>\n</div>',
+            html: localStorage.getItem('wnet-html') || '<div class="container">\n  <h1>Design Inicial de WnetStudio</h1>\n  <p>Minimalismo e clareza.</p>\n  <button id="btn">Explorar</button>\n</div>',
             css: localStorage.getItem('wnet-css') || 'body { background: #fff; color: #1d1d1f; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: -apple-system, sans-serif; margin: 0; }\n.container { text-align: center; border: 1px solid #d2d2d7; padding: 3rem; border-radius: 30px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }\nbutton { background: #007aff; color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 500; cursor: pointer; margin-top: 20px; transition: 0.2s; }\nbutton:hover { opacity: 0.8; }',
-            javascript: localStorage.getItem('wnet-js') || 'document.getElementById("btn").onclick = () => {\n  alert("Olá do ecossistema Apple!");\n};'
+            javascript: localStorage.getItem('wnet-js') || 'document.getElementById("btn").onclick = () => {\n  alert("Olá do ecossistema Wnet!");\n};'
         };
 
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
