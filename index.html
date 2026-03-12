@@ -165,15 +165,15 @@
     <script>
         function validateAuth() {
             const input = document.getElementById('passInput');
-            if(["174510203040508", "alan"].includes(input.value)) {
+            if(["DOUGLAS", "S2"].includes(input.value)) {
                 document.getElementById('auth-overlay').remove();
             } else { input.value = ""; }
         }
         document.getElementById('passInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') validateAuth(); });
 
-        let editor, currentLang = 'html';
+        let editor, currentLang = 'html', currentDevice = 'desktop';
         let files = {
-            html: localStorage.getItem('wnet-html') || '<div style="padding:40px; text-align:center;"><h1>Wnet Studio Blue</h1></div>',
+            html: localStorage.getItem('wnet-html') || '<div style="padding:40px; text-align:center;"><h1>BEM VINDO AO WNETStudio</h1></div>',
             css: localStorage.getItem('wnet-css') || '',
             javascript: localStorage.getItem('wnet-js') || ''
         };
@@ -208,6 +208,7 @@
         }
 
         function setPreview(type) {
+            currentDevice = type;
             const container = document.getElementById('preview-container');
             container.className = ''; 
             setTimeout(() => {
@@ -223,7 +224,9 @@
             document.querySelectorAll('.editor-full, .preview-full').forEach(e => e.classList.remove('editor-full', 'preview-full'));
             if (!isFull) {
                 el.classList.add(type === 'editor' ? 'editor-full' : 'preview-full');
-                if(type === 'preview') setPreview('desktop');
+            } else {
+                // Ao sair de tela cheia, restaura o dispositivo salvo em currentDevice
+                setPreview(currentDevice);
             }
             editor.layout();
         }
