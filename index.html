@@ -152,16 +152,65 @@
         let editor, currentLang = 'html', currentDevice = 'desktop';
         let files = {
             html: localStorage.getItem('wnet-html') || `
-<div class="flex flex-col items-center justify-center min-h-[400px] p-10 bg-gradient-to-br from-blue-50 to-white rounded-3xl border border-blue-100 shadow-sm text-center">
-    <div class="w-20 h-20 bg-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-        <span class="text-4xl text-white">🚀</span>
+<script src="https://cdn.tailwindcss.com"><\/script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background: #0a0a0c; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; }
+    .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8); }
+    .gradient-text { background: linear-gradient(135deg, #007aff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .float { animation: floating 4s ease-in-out infinite; }
+    @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+    .glow { position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,122,255,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; top: -150px; left: -150px; z-index: -1; pointer-events: none; }
+</style>
+
+<div class="relative w-full max-w-2xl mx-auto p-8">
+    <div class="glow"></div>
+    <div class="glass-card p-12 text-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#007aff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        
+        <div class="float mb-8 inline-block">
+            <div class="w-24 h-24 bg-gradient-to-tr from-[#007aff] to-[#00d4ff] rounded-[28%] flex items-center justify-center shadow-[0_0_40px_rgba(0,122,255,0.4)] mx-auto relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/20 blur-md rounded-full -top-10 -left-10 w-20 h-20"></div>
+                <svg width="44" height="44" viewBox="0 0 256 256" fill="white"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
+            </div>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+            Bem-vindo ao <span class="gradient-text">wnetStudio</span>
+        </h1>
+        
+        <p class="text-slate-400 text-lg max-w-md mx-auto mb-10 h-6" id="typewriter-text"></p>
+        
+        <div class="flex flex-wrap items-center justify-center gap-4 relative z-10">
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-[#007aff] font-mono font-bold text-sm">/&gt;</span>
+                <span class="text-sm font-medium text-slate-200">HTML</span>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-[#00d4ff] font-mono font-bold text-sm">{ }</span>
+                <span class="text-sm font-medium text-slate-200">CSS</span>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-yellow-400 font-mono font-bold text-sm">JS</span>
+                <span class="text-sm font-medium text-slate-200">JavaScript</span>
+            </div>
+        </div>
     </div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Bem-vindo ao WnetStudio</h1>
-    <p class="text-gray-600 max-w-md mb-8">Este é o seu ambiente de desenvolvimento. Comece editando este código HTML, adicione seu estilo no CSS ou traga vida com JavaScript.</p>
-    <div class="px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-        Pronto para criar algo incrível?
-    </div>
-</div>`,
+</div>
+
+<script>
+    const text = "O futuro do seu código começa aqui.";
+    const el = document.getElementById('typewriter-text');
+    let i = 0;
+    function typeWriter() {
+        if (i < text.length) {
+            el.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, 40);
+        }
+    }
+    setTimeout(typeWriter, 600);
+<\/script>`,
             css: localStorage.getItem('wnet-css') || '',
             javascript: localStorage.getItem('wnet-js') || ''
         };
