@@ -12,7 +12,7 @@
         :root {
             --bg: #f5f5f7;
             --panel: rgba(255, 255, 255, 0.7);
-            --accent: #007aff;
+            --accent: #007aff; 
             --border: rgba(0, 0, 0, 0.1);
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
@@ -21,7 +21,7 @@
         body { 
             background: var(--bg);
             color: var(--text-primary); 
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             overflow: hidden;
             margin: 0;
@@ -36,40 +36,38 @@
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
-        /* Classes para Fullscreen */
-        .editor-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 40 !important; }
-        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 40 !important; background: #e5e5e5 !important; }
+        /* ANIMAÇÃO DOS BOTÕES */
+        button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+        button:active { transform: translateY(0px) scale(0.96); }
 
-        .main-container { display: flex; height: calc(100vh - 64px); padding: 20px; gap: 20px; }
-        .editor-section { width: 45%; display: flex; flex-direction: column; overflow: hidden; }
-        .preview-section { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        
-        #preview-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        #preview-container { background: white; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        
-        #monaco-editor { flex: 1; width: 100%; }
-        iframe { width: 100%; height: 100%; border: none; }
+        /* Fullscreen Classes */
+        .editor-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: white !important; }
+        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: #f5f5f7 !important; }
 
-        /* Estilo Dispositivos */
-        .mode-mobile { width: 375px; height: 667px; border: 12px solid #000; border-radius: 40px; }
-        .mode-tablet { width: 768px; height: 1024px; border: 12px solid #000; border-radius: 30px; }
-        .mode-desktop { width: 100%; height: 100%; border-radius: 16px; border: 1px solid var(--border); }
-
-        /* Tela de Login Apple Style Original */
-        #auth-overlay {
-            position: fixed; inset: 0; z-index: 9999; background: #fff;
-            display: flex; align-items: center; justify-content: center; transition: all 0.5s ease;
+        #preview-container {
+            position: relative;
+            background: #ffffff;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
+
+        .browser-header { display: none; height: 38px; background: #f1f1f1; border-bottom: 1px solid #e5e5e5; align-items: center; padding: 0 16px; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        .tab-btn { position: relative; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+        .tab-btn.active { color: var(--text-primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 2px; background: var(--text-primary); border-radius: 2px; }
+
+        .btn-apple { background: #ffffff; border: 1px solid #d2d2d7; border-radius: 8px; color: #1d1d1f; }
+        .btn-primary-apple { background: var(--accent); color: white; border-radius: 8px; }
+
+        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.5s ease-in-out; }
         .auth-card { width: 320px; text-align: center; }
-        .auth-input {
-            width: 100%; background: #f5f5f7; border: 1px solid #d2d2d7; border-radius: 12px;
-            padding: 12px; color: #000; text-align: center; font-size: 1rem; margin: 24px 0; outline: none;
-        }
+        .auth-input { width: 100%; background: #f5f5f7; border: 1px solid #d2d2d7; border-radius: 12px; padding: 12px; text-align: center; margin: 24px 0; outline: none; }
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-
-        .btn-primary-apple { background: var(--accent); color: white; border-radius: 8px; transition: opacity 0.2s; }
-        .tab-btn.active { color: var(--text-primary); border-bottom: 2px solid var(--text-primary); }
     </style>
 </head>
 <body class="flex flex-col">
@@ -87,80 +85,87 @@
         </div>
     </div>
 
-    <header class="h-16 flex items-center justify-between px-8 apple-glass z-50">
-        <div class="flex items-center gap-8">
-            <h1 class="text-sm font-semibold tracking-tight">WNET<span class="opacity-50">Studio</span></h1>
-            <nav class="flex gap-6">
-                <button onclick="switchTab('html')" id="tab-html" class="tab-btn active text-xs font-medium uppercase tracking-wider">HTML</button>
-                <button onclick="switchTab('css')" id="tab-css" class="tab-btn text-xs font-medium uppercase tracking-wider text-gray-400">CSS</button>
-                <button onclick="switchTab('javascript')" id="tab-js" class="tab-btn text-xs font-medium uppercase tracking-wider text-gray-400">JS</button>
+    <header class="h-16 flex items-center justify-between px-8 border-b border-gray-200 z-50 apple-glass">
+        <div class="flex items-center gap-10">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div class="h-7 w-7 bg-black rounded-lg flex items-center justify-center">
+                    <div class="h-2 w-2 bg-white rounded-full"></div>
+                </div>
+                <h1 class="text-sm font-semibold tracking-tight text-black">WNET<span class="font-normal opacity-50">Studio</span></h1>
+            </div>
+            <nav class="flex gap-8 items-center pt-1">
+                <button onclick="switchTab('html')" id="tab-html" class="tab-btn active uppercase tracking-wider">HTML</button>
+                <button onclick="switchTab('css')" id="tab-css" class="tab-btn uppercase tracking-wider">CSS</button>
+                <button onclick="switchTab('javascript')" id="tab-js" class="tab-btn uppercase tracking-wider">JS</button>
             </nav>
         </div>
 
-        <div class="flex items-center gap-2">
-            <div class="flex bg-black/5 p-1 rounded-xl mr-2">
-                <button onclick="setPreview('mobile')" class="px-3 py-1 hover:bg-white rounded-lg transition-all" title="Celular">📱</button>
-                <button onclick="setPreview('tablet')" class="px-3 py-1 hover:bg-white rounded-lg transition-all" title="Tablet">📟</button>
-                <button onclick="setPreview('desktop')" class="px-3 py-1 hover:bg-white rounded-lg transition-all" title="Desktop">💻</button>
-            </div>
+        <div class="flex items-center gap-3">
+            <button onclick="importFile()" class="text-xs font-medium px-4 py-2 btn-apple">Importar</button>
+            <button onclick="selectAllCode()" class="text-xs font-medium px-4 py-2 btn-apple">Selecionar Tudo</button>
+            <button onclick="clearAll()" class="text-xs font-medium px-4 py-2 text-red-500">Limpar Tudo</button>
             
-            <button onclick="selectAllCode()" class="text-[11px] font-medium px-3 py-1.5 bg-white border border-gray-200 rounded-lg">Selecionar Tudo</button>
-            <button onclick="clearAll()" class="text-[11px] font-medium px-3 py-1.5 text-red-500">Limpar Tudo</button>
+            <button onclick="toggleFS('editor')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Editor</button>
+            <button onclick="toggleFS('preview')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Projeto</button>
             
-            <button onclick="toggleFS('editor')" class="text-[11px] font-bold px-3 py-1.5 bg-black/5 rounded-lg">Aumentar Editor</button>
-            <button onclick="toggleFS('preview')" class="text-[11px] font-bold px-3 py-1.5 bg-black/5 rounded-lg">Aumentar Projeto</button>
-            
-            <button onclick="downloadBundle()" class="ml-2 text-[11px] font-semibold px-4 py-2 btn-primary-apple shadow-lg">Exportar HTML</button>
+            <button onclick="downloadBundle()" class="text-xs font-semibold px-5 py-2 btn-primary-apple shadow-lg">Exportar HTML</button>
+            <input type="file" id="fileInput" class="hidden" accept=".html" onchange="handleImport(event)">
         </div>
     </header>
 
-    <main class="main-container">
-        <section id="sec-editor" class="editor-section apple-glass rounded-2xl p-2 border border-gray-200">
-            <div id="monaco-editor"></div>
+    <main class="flex-1 flex overflow-hidden p-5 gap-5">
+        <section id="sec-editor" class="w-[45%] apple-glass rounded-2xl flex flex-col p-2 overflow-hidden border border-gray-200">
+            <div id="editor-container" class="flex-1 w-full"></div>
         </section>
 
-        <section id="sec-preview" class="preview-section">
-            <div id="preview-wrapper">
-                <div id="preview-container" class="mode-desktop">
-                    <iframe id="preview"></iframe>
+        <section id="sec-preview" class="flex-1 flex flex-col gap-4">
+            <div class="flex items-center justify-between px-2">
+                <div class="flex gap-4 bg-white px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm">
+                   <button onclick="setPreview('desktop')" title="Desktop">💻</button>
+                   <button onclick="setPreview('tablet')" title="Tablet">📟</button>
+                   <button onclick="setPreview('mobile')" title="Celular">📱</button>
+                </div>
+            </div>
+            <div id="preview-wrapper" class="flex-1 flex items-center justify-center overflow-hidden">
+                <div id="preview-container" class="w-full h-full rounded-2xl border border-gray-200">
+                    <div class="browser-header" id="browser-ui">
+                        <div class="dot bg-[#ff5f56]"></div><div class="dot bg-[#ffbd2e]"></div><div class="dot bg-[#27c93f]"></div>
+                    </div>
+                    <iframe id="preview" class="w-full h-full border-none bg-white"></iframe>
                 </div>
             </div>
         </section>
     </main>
 
     <script>
-        // Lógica de Autenticação Original Restaurada
         function validateAuth() {
             const input = document.getElementById('passInput');
             const overlay = document.getElementById('auth-overlay');
-            const error = document.getElementById('error-msg');
             if(["174510203040508", "NOVASENHA01"].includes(input.value)) {
-                overlay.style.opacity = '0';
-                overlay.style.transform = 'translateY(-100%)';
+                overlay.style.opacity = '0'; overlay.style.transform = 'translateY(-100%)';
                 setTimeout(() => overlay.remove(), 600);
             } else {
                 input.classList.add('shake');
-                error.style.opacity = '1';
-                setTimeout(() => { input.classList.remove('shake'); error.style.opacity = '0'; input.value = ""; }, 1000);
+                setTimeout(() => { input.classList.remove('shake'); input.value = ""; }, 1000);
             }
         }
 
         let editor, currentLang = 'html';
         let files = {
-            html: localStorage.getItem('wnet-html') || '<h1>Bem-vindo ao WnetStudio</h1>',
-            css: localStorage.getItem('wnet-css') || 'body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }',
-            javascript: localStorage.getItem('wnet-js') || 'console.log("Iniciado");'
+            html: localStorage.getItem('wnet-html') || '<h1>Bem-vindo</h1>',
+            css: localStorage.getItem('wnet-css') || '',
+            javascript: localStorage.getItem('wnet-js') || ''
         };
 
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
         require(['vs/editor/editor.main'], function() {
-            editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
                 value: files[currentLang],
                 language: 'html',
                 theme: 'vs',
                 automaticLayout: true,
-                minimap: { enabled: false },
-                fontSize: 14
+                fontSize: 14,
+                minimap: { enabled: false }
             });
             editor.onDidChangeModelContent(() => { 
                 files[currentLang] = editor.getValue(); 
@@ -170,25 +175,24 @@
             updatePreview();
         });
 
+        function switchTab(lang) {
+            currentLang = lang;
+            monaco.editor.setModelLanguage(editor.getModel(), lang === 'javascript' ? 'javascript' : lang);
+            editor.setValue(files[lang]);
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${lang === 'javascript' ? 'js' : lang}`));
+        }
+
         function updatePreview() {
             const frame = document.getElementById('preview');
             const source = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
             frame.srcdoc = source;
         }
 
-        function switchTab(lang) {
-            currentLang = lang;
-            monaco.editor.setModelLanguage(editor.getModel(), lang === 'javascript' ? 'javascript' : lang);
-            editor.setValue(files[lang]);
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.toggle('active', b.id === `tab-${lang === 'javascript' ? 'js' : lang}`);
-                b.classList.toggle('text-gray-400', b.id !== `tab-${lang === 'javascript' ? 'js' : lang}`);
-            });
-        }
-
         function setPreview(type) {
             const container = document.getElementById('preview-container');
-            container.className = `mode-${type}`;
+            if(type === 'mobile') { container.style.width = '375px'; container.style.height = '667px'; container.style.borderRadius = '40px'; }
+            else if(type === 'tablet') { container.style.width = '768px'; container.style.height = '1024px'; container.style.borderRadius = '30px'; }
+            else { container.style.width = '100%'; container.style.height = '100%'; container.style.borderRadius = '16px'; }
         }
 
         function toggleFS(type) {
@@ -200,8 +204,21 @@
             editor.layout();
         }
 
+        function importFile() { document.getElementById('fileInput').click(); }
+        function handleImport(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const doc = new DOMParser().parseFromString(e.target.result, 'text/html');
+                files.html = doc.body.innerHTML;
+                files.css = doc.querySelector('style')?.innerHTML || "";
+                files.javascript = doc.querySelector('script')?.innerHTML || "";
+                editor.setValue(files[currentLang]); updatePreview();
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
         function selectAllCode() { editor.focus(); editor.setSelection(editor.getModel().getFullModelRange()); }
-        function clearAll() { if(confirm("Limpar tudo?")) { files.html = ""; files.css = ""; files.javascript = ""; editor.setValue(""); updatePreview(); } }
+        function clearAll() { if(confirm("Limpar?")) { editor.setValue(""); updatePreview(); } }
         function downloadBundle() {
             const content = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], {type: 'text/html'})); a.download = 'projeto.html'; a.click();
