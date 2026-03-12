@@ -41,9 +41,8 @@
         button:active { transform: translateY(0px) scale(0.96); }
 
         .editor-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: white !important; }
-        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: var(--bg) !important; padding: 20px; }
+        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: var(--bg) !important; padding: 0 !important; }
 
-        /* AREA DE PREVIEW */
         #preview-wrapper {
             display: flex;
             align-items: center;
@@ -60,16 +59,17 @@
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.1);
         }
 
-        /* MOLDURAS TIPO APPLE */
+        /* MOLDURAS */
         .device-desktop { 
             width: 100% !important; 
             height: 100% !important; 
             border: none !important; 
-            border-radius: 12px !important; 
+            border-radius: 0 !important; 
             outline: none !important;
+            box-shadow: none !important;
         }
 
         .device-tablet { 
@@ -86,20 +86,6 @@
             border: 14px solid #1a1a1a !important; 
             border-radius: 58px !important; 
             outline: 2px solid #3a3a3a;
-        }
-
-        /* Dynamic Island */
-        .device-mobile::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 30px;
-            background: #1a1a1a;
-            border-radius: 20px;
-            z-index: 99;
         }
 
         .tab-btn { position: relative; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
@@ -147,6 +133,7 @@
         <div class="flex items-center gap-3">
             <button onclick="importFile()" class="text-xs font-medium px-4 py-2 btn-apple">Importar</button>
             <button onclick="selectAllCode()" class="text-xs font-medium px-4 py-2 btn-apple">Selecionar Tudo</button>
+            <button onclick="clearAll()" class="text-xs font-medium px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg">Limpar</button>
             <button onclick="toggleFS('editor')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Editor</button>
             <button onclick="toggleFS('preview')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Projeto</button>
             <button onclick="downloadBundle()" class="text-xs font-semibold px-5 py-2 btn-primary-apple shadow-md">Exportar Projeto</button>
@@ -162,9 +149,9 @@
         <section id="sec-preview" class="flex-1 flex flex-col gap-4">
             <div class="flex items-center justify-between px-2">
                 <div class="flex gap-6 bg-white/80 backdrop-blur-md px-5 py-2 rounded-xl border border-blue-50 shadow-sm">
-                   <button onclick="setPreview('desktop')" class="text-2xl hover:scale-110">💻</button>
-                   <button onclick="setPreview('tablet')" class="text-2xl hover:scale-110">📟</button>
-                   <button onclick="setPreview('mobile')" class="text-2xl hover:scale-110">📱</button>
+                   <button onclick="setPreview('desktop')" class="text-2xl">💻</button>
+                   <button onclick="setPreview('tablet')" class="text-2xl">📟</button>
+                   <button onclick="setPreview('mobile')" class="text-2xl">📱</button>
                 </div>
             </div>
             <div id="preview-wrapper">
@@ -186,8 +173,8 @@
 
         let editor, currentLang = 'html';
         let files = {
-            html: localStorage.getItem('wnet-html') || '<div style="padding:40px; text-align:center;"><h1>Wnet Studio Blue</h1><p>Visualização Desktop Ativa.</p></div>',
-            css: localStorage.getItem('wnet-css') || 'body { font-family: sans-serif; }',
+            html: localStorage.getItem('wnet-html') || '<div style="padding:40px; text-align:center;"><h1>Wnet Studio Blue</h1></div>',
+            css: localStorage.getItem('wnet-css') || '',
             javascript: localStorage.getItem('wnet-js') || ''
         };
 
@@ -241,6 +228,7 @@
             editor.layout();
         }
 
+        function clearAll() { if(confirm("Deseja limpar todo o código?")) { editor.setValue(""); localStorage.clear(); updatePreview(); } }
         function importFile() { document.getElementById('fileInput').click(); }
         function handleImport(event) {
             const reader = new FileReader();
