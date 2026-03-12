@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WnetStudio</title>
+    <title>WnetStudio - Blue Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #f5f5f7;
-            --panel: rgba(255, 255, 255, 0.7);
+            --bg: #f2f2f7;
+            --panel: rgba(255, 255, 255, 0.75);
             --accent: #007aff; 
-            --border: rgba(0, 0, 0, 0.1);
+            --border: rgba(0, 122, 255, 0.15);
             --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
+            --text-secondary: #48484a;
         }
 
         body { 
@@ -30,68 +30,112 @@
 
         .apple-glass {
             background: var(--panel);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 122, 255, 0.05);
         }
 
-        /* ANIMAÇÃO DOS BOTÕES */
         button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
-        button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+        button:hover { transform: translateY(-1px); filter: brightness(1.1); }
         button:active { transform: translateY(0px) scale(0.96); }
 
-        /* Fullscreen Classes */
         .editor-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: white !important; }
-        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: #f5f5f7 !important; }
+        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: var(--bg) !important; padding: 20px; }
+
+        /* AREA DE PREVIEW */
+        #preview-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
 
         #preview-container {
             position: relative;
             background: #ffffff;
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.2);
         }
 
-        .browser-header { display: none; height: 38px; background: #f1f1f1; border-bottom: 1px solid #e5e5e5; align-items: center; padding: 0 16px; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        /* MOLDURAS TIPO APPLE */
+        .device-desktop { 
+            width: 100% !important; 
+            height: 100% !important; 
+            border: none !important; 
+            border-radius: 12px !important; 
+            outline: none !important;
+        }
+
+        .device-tablet { 
+            width: 820px; 
+            height: 92%; 
+            border: 16px solid #1a1a1a !important; 
+            border-radius: 48px !important; 
+            outline: 2px solid #3a3a3a;
+        }
+
+        .device-mobile { 
+            width: 390px; 
+            height: 85%; 
+            border: 14px solid #1a1a1a !important; 
+            border-radius: 58px !important; 
+            outline: 2px solid #3a3a3a;
+        }
+
+        /* Dynamic Island */
+        .device-mobile::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 30px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            z-index: 99;
+        }
 
         .tab-btn { position: relative; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-        .tab-btn.active { color: var(--text-primary); }
-        .tab-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 2px; background: var(--text-primary); border-radius: 2px; }
+        .tab-btn.active { color: var(--accent); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 2px; background: var(--accent); border-radius: 2px; }
 
-        .btn-apple { background: #ffffff; border: 1px solid #d2d2d7; border-radius: 8px; color: #1d1d1f; }
+        .btn-apple { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; color: var(--accent); font-weight: 500; }
         .btn-primary-apple { background: var(--accent); color: white; border-radius: 8px; }
 
-        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.5s ease-in-out; }
+        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: #fff; display: flex; align-items: center; justify-content: center; }
         .auth-card { width: 320px; text-align: center; }
-        .auth-input { width: 100%; background: #f5f5f7; border: 1px solid #d2d2d7; border-radius: 12px; padding: 12px; text-align: center; margin: 24px 0; outline: none; }
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .auth-input { width: 100%; background: #f5f5f7; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; margin: 24px 0; outline: none; }
+        
+        #preview { flex: 1; width: 100%; height: 100%; border: none; background: white; border-radius: inherit; }
     </style>
 </head>
 <body class="flex flex-col">
 
     <div id="auth-overlay">
         <div class="auth-card">
-            <div class="w-20 h-20 bg-black rounded-[22%] mx-auto mb-8 flex items-center justify-center shadow-xl">
+            <div class="w-20 h-20 bg-[#007aff] rounded-[22%] mx-auto mb-8 flex items-center justify-center shadow-lg">
                 <svg width="40" height="40" viewBox="0 0 256 256" fill="white"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
             </div>
-            <h2 class="text-black font-semibold text-2xl tracking-tight">Iniciar Sessão</h2>
-            <p class="text-gray-500 text-sm mt-1">Digite a senha de Acesso</p>
-            <input type="password" id="passInput" class="auth-input" placeholder="Senha" maxlength="20">
+            <h2 class="text-black font-semibold text-2xl tracking-tight">Wnet Studio</h2>
+            <input type="password" id="passInput" class="auth-input" placeholder="Senha de Acesso">
             <button onclick="validateAuth()" class="w-full py-3 btn-primary-apple font-medium">Entrar</button>
-            <p id="error-msg" class="text-red-500 text-xs mt-4 opacity-0">Senha incorreta.</p>
         </div>
     </div>
 
-    <header class="h-16 flex items-center justify-between px-8 border-b border-gray-200 z-50 apple-glass">
+    <header class="h-16 flex items-center justify-between px-8 border-b border-blue-50 z-50 apple-glass">
         <div class="flex items-center gap-10">
             <div class="flex items-center gap-2 group cursor-pointer">
-                <div class="h-7 w-7 bg-black rounded-lg flex items-center justify-center">
+                <div class="h-7 w-7 bg-[#007aff] rounded-lg flex items-center justify-center shadow-sm">
                     <div class="h-2 w-2 bg-white rounded-full"></div>
                 </div>
-                <h1 class="text-sm font-semibold tracking-tight text-black">WNET<span class="font-normal opacity-50">Studio</span></h1>
+                <h1 class="text-sm font-semibold tracking-tight text-black">WNET<span class="text-[#007aff] font-bold">Studio</span></h1>
             </div>
             <nav class="flex gap-8 items-center pt-1">
                 <button onclick="switchTab('html')" id="tab-html" class="tab-btn active uppercase tracking-wider">HTML</button>
@@ -103,35 +147,29 @@
         <div class="flex items-center gap-3">
             <button onclick="importFile()" class="text-xs font-medium px-4 py-2 btn-apple">Importar</button>
             <button onclick="selectAllCode()" class="text-xs font-medium px-4 py-2 btn-apple">Selecionar Tudo</button>
-            <button onclick="clearAll()" class="text-xs font-medium px-4 py-2 text-red-500">Limpar Tudo</button>
-            
             <button onclick="toggleFS('editor')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Editor</button>
             <button onclick="toggleFS('preview')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Projeto</button>
-            
-            <button onclick="downloadBundle()" class="text-xs font-semibold px-5 py-2 btn-primary-apple shadow-lg">Exportar HTML</button>
+            <button onclick="downloadBundle()" class="text-xs font-semibold px-5 py-2 btn-primary-apple shadow-md">Exportar Projeto</button>
             <input type="file" id="fileInput" class="hidden" accept=".html" onchange="handleImport(event)">
         </div>
     </header>
 
     <main class="flex-1 flex overflow-hidden p-5 gap-5">
-        <section id="sec-editor" class="w-[45%] apple-glass rounded-2xl flex flex-col p-2 overflow-hidden border border-gray-200">
+        <section id="sec-editor" class="w-[40%] apple-glass rounded-2xl flex flex-col p-2 overflow-hidden border border-blue-100">
             <div id="editor-container" class="flex-1 w-full"></div>
         </section>
 
         <section id="sec-preview" class="flex-1 flex flex-col gap-4">
             <div class="flex items-center justify-between px-2">
-                <div class="flex gap-4 bg-white px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm">
-                   <button onclick="setPreview('desktop')" title="Desktop">💻</button>
-                   <button onclick="setPreview('tablet')" title="Tablet">📟</button>
-                   <button onclick="setPreview('mobile')" title="Celular">📱</button>
+                <div class="flex gap-6 bg-white/80 backdrop-blur-md px-5 py-2 rounded-xl border border-blue-50 shadow-sm">
+                   <button onclick="setPreview('desktop')" class="text-2xl hover:scale-110">💻</button>
+                   <button onclick="setPreview('tablet')" class="text-2xl hover:scale-110">📟</button>
+                   <button onclick="setPreview('mobile')" class="text-2xl hover:scale-110">📱</button>
                 </div>
             </div>
-            <div id="preview-wrapper" class="flex-1 flex items-center justify-center overflow-hidden">
-                <div id="preview-container" class="w-full h-full rounded-2xl border border-gray-200">
-                    <div class="browser-header" id="browser-ui">
-                        <div class="dot bg-[#ff5f56]"></div><div class="dot bg-[#ffbd2e]"></div><div class="dot bg-[#27c93f]"></div>
-                    </div>
-                    <iframe id="preview" class="w-full h-full border-none bg-white"></iframe>
+            <div id="preview-wrapper">
+                <div id="preview-container" class="device-desktop">
+                    <iframe id="preview"></iframe>
                 </div>
             </div>
         </section>
@@ -140,20 +178,16 @@
     <script>
         function validateAuth() {
             const input = document.getElementById('passInput');
-            const overlay = document.getElementById('auth-overlay');
             if(["174510203040508", "NOVASENHA01"].includes(input.value)) {
-                overlay.style.opacity = '0'; overlay.style.transform = 'translateY(-100%)';
-                setTimeout(() => overlay.remove(), 600);
-            } else {
-                input.classList.add('shake');
-                setTimeout(() => { input.classList.remove('shake'); input.value = ""; }, 1000);
-            }
+                document.getElementById('auth-overlay').remove();
+            } else { input.value = ""; }
         }
+        document.getElementById('passInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') validateAuth(); });
 
         let editor, currentLang = 'html';
         let files = {
-            html: localStorage.getItem('wnet-html') || '<h1>Bem-vindo</h1>',
-            css: localStorage.getItem('wnet-css') || '',
+            html: localStorage.getItem('wnet-html') || '<div style="padding:40px; text-align:center;"><h1>Wnet Studio Blue</h1><p>Visualização Desktop Ativa.</p></div>',
+            css: localStorage.getItem('wnet-css') || 'body { font-family: sans-serif; }',
             javascript: localStorage.getItem('wnet-js') || ''
         };
 
@@ -169,7 +203,6 @@
             });
             editor.onDidChangeModelContent(() => { 
                 files[currentLang] = editor.getValue(); 
-                localStorage.setItem('wnet-' + currentLang, files[currentLang]);
                 updatePreview(); 
             });
             updatePreview();
@@ -183,24 +216,28 @@
         }
 
         function updatePreview() {
-            const frame = document.getElementById('preview');
             const source = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
-            frame.srcdoc = source;
+            document.getElementById('preview').srcdoc = source;
         }
 
         function setPreview(type) {
             const container = document.getElementById('preview-container');
-            if(type === 'mobile') { container.style.width = '375px'; container.style.height = '667px'; container.style.borderRadius = '40px'; }
-            else if(type === 'tablet') { container.style.width = '768px'; container.style.height = '1024px'; container.style.borderRadius = '30px'; }
-            else { container.style.width = '100%'; container.style.height = '100%'; container.style.borderRadius = '16px'; }
+            container.className = ''; 
+            setTimeout(() => {
+                if(type === 'mobile') container.classList.add('device-mobile');
+                else if(type === 'tablet') container.classList.add('device-tablet');
+                else container.classList.add('device-desktop');
+            }, 10);
         }
 
         function toggleFS(type) {
             const el = document.getElementById(type === 'editor' ? 'sec-editor' : 'sec-preview');
             const isFull = el.classList.contains(type === 'editor' ? 'editor-full' : 'preview-full');
-            document.getElementById('sec-editor').classList.remove('editor-full');
-            document.getElementById('sec-preview').classList.remove('preview-full');
-            if (!isFull) el.classList.add(type === 'editor' ? 'editor-full' : 'preview-full');
+            document.querySelectorAll('.editor-full, .preview-full').forEach(e => e.classList.remove('editor-full', 'preview-full'));
+            if (!isFull) {
+                el.classList.add(type === 'editor' ? 'editor-full' : 'preview-full');
+                if(type === 'preview') setPreview('desktop');
+            }
             editor.layout();
         }
 
@@ -210,18 +247,14 @@
             reader.onload = (e) => {
                 const doc = new DOMParser().parseFromString(e.target.result, 'text/html');
                 files.html = doc.body.innerHTML;
-                files.css = doc.querySelector('style')?.innerHTML || "";
-                files.javascript = doc.querySelector('script')?.innerHTML || "";
                 editor.setValue(files[currentLang]); updatePreview();
             };
             reader.readAsText(event.target.files[0]);
         }
-
         function selectAllCode() { editor.focus(); editor.setSelection(editor.getModel().getFullModelRange()); }
-        function clearAll() { if(confirm("Limpar?")) { editor.setValue(""); updatePreview(); } }
         function downloadBundle() {
             const content = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
-            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], {type: 'text/html'})); a.download = 'projeto.html'; a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], {type: 'text/html'})); a.download = 'projeto_wnet.html'; a.click();
         }
     </script>
 </body>
