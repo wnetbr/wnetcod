@@ -1,0 +1,450 @@
+<!DOCTYPE html><html><head><style>/* 1. Refinamento de Vidro e Sombras */
+.apple-glass {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.01), 
+        0 2px 4px -1px rgba(0, 0, 0, 0.01),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 2. Tipografia e Botões (Apple-Style) */
+.tab-btn {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: -0.01em;
+    opacity: 0.6;
+}
+
+.tab-btn:hover {
+    opacity: 1;
+    background: rgba(0, 122, 255, 0.05);
+    border-radius: 6px;
+}
+
+.tab-btn.active {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.tab-btn.active::after {
+    height: 3px !important;
+    background: linear-gradient(90deg, #007aff, #00d4ff) !important;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+/* 3. Estilização do Monaco Editor Container */
+#editor-container {
+    border-radius: 12px;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+/* 4. Molduras de Dispositivos (Efeito Profissional) */
+.device-tablet, .device-mobile {
+    border-color: #121212 !important; /* Cor mais próxima do hardware Apple */
+    background: #000 !important;
+    transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 5. Animações de Entrada */
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+main > section {
+    animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 6. Customização da Scrollbar (Invisível até o Hover) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 7. Melhoria no Overlay de Autenticação */
+#auth-overlay {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(50px) !important;
+    -webkit-backdrop-filter: blur(50px) !important;
+}
+
+.auth-card h2 {
+    letter-spacing: -0.03em;
+    color: #1d1d1f;
+}</style></head><body><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WnetStudio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #f2f2f7;
+            --panel: rgba(255, 255, 255, 0.75);
+            --accent: #007aff; 
+            --border: rgba(0, 122, 255, 0.15);
+            --text-primary: #1d1d1f;
+            --text-secondary: #48484a;
+        }
+
+        body { 
+            background: var(--bg);
+            color: var(--text-primary); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .apple-glass {
+            background: var(--panel);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 122, 255, 0.05);
+        }
+
+        button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        button:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        button:active { transform: translateY(0px) scale(0.96); }
+
+        .editor-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: white !important; }
+        .preview-full { position: fixed !important; inset: 64px 0 0 0 !important; width: 100% !important; z-index: 100 !important; background: var(--bg) !important; padding: 0 !important; }
+
+        #preview-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #preview-container {
+            position: relative;
+            background: #ffffff;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.1);
+        }
+
+        .device-desktop { width: 100% !important; height: 100% !important; border: none !important; border-radius: 0 !important; outline: none !important; box-shadow: none !important; }
+        .device-tablet { width: 820px; height: 92%; border: 16px solid #1a1a1a !important; border-radius: 48px !important; outline: 2px solid #3a3a3a; }
+        .device-mobile { width: 390px; height: 85%; border: 14px solid #1a1a1a !important; border-radius: 58px !important; outline: 2px solid #3a3a3a; }
+
+        .tab-btn { position: relative; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+        .tab-btn.active { color: var(--accent); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 2px; background: var(--accent); border-radius: 2px; }
+
+        .btn-apple { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; color: var(--accent); font-weight: 500; }
+        .btn-primary-apple { background: var(--accent); color: white; border-radius: 8px; }
+
+        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: #fff; display: flex; align-items: center; justify-content: center; }
+        .auth-card { width: 320px; text-align: center; }
+        .auth-input { width: 100%; background: #f5f5f7; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; margin: 24px 0; outline: none; }
+        
+        #preview { flex: 1; width: 100%; height: 100%; border: none; background: white; border-radius: inherit; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div class="w-20 h-20 bg-[#007aff] rounded-[22%] mx-auto mb-8 flex items-center justify-center shadow-lg">
+                <svg width="40" height="40" viewBox="0 0 256 256" fill="white"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
+            </div>
+            <h2 class="text-black font-semibold text-2xl tracking-tight">Wnet Studio</h2>
+            <input type="password" id="passInput" class="auth-input" placeholder="Senha de Acesso">
+            <button onclick="validateAuth()" class="w-full py-3 btn-primary-apple font-medium">Entrar</button>
+        </div>
+    </div>
+
+    <header class="h-16 flex items-center justify-between px-8 border-b border-blue-50 z-50 apple-glass">
+        <div class="flex items-center gap-10">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div class="h-7 w-7 bg-[#007aff] rounded-lg flex items-center justify-center shadow-sm">
+                    <div class="h-2 w-2 bg-white rounded-full"></div>
+                </div>
+                <h1 class="text-sm font-semibold tracking-tight text-black">WNET<span class="text-[#007aff] font-bold">Studio</span></h1>
+            </div>
+            <nav class="flex gap-8 items-center pt-1">
+                <button onclick="switchTab('html')" id="tab-html" class="tab-btn active uppercase tracking-wider">HTML</button>
+                <button onclick="switchTab('css')" id="tab-css" class="tab-btn uppercase tracking-wider">CSS</button>
+                <button onclick="switchTab('javascript')" id="tab-js" class="tab-btn uppercase tracking-wider">JS</button>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="importFile()" class="text-xs font-medium px-4 py-2 btn-apple">Importar</button>
+            <button onclick="selectAllCode()" class="text-xs font-medium px-4 py-2 btn-apple">Selecionar Tudo</button>
+            <button onclick="clearAll()" class="text-xs font-medium px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg">Limpar</button>
+            <button onclick="toggleFS('editor')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Editor</button>
+            <button onclick="toggleFS('preview')" class="text-xs font-bold px-3 py-2 btn-apple">Aumentar Projeto</button>
+            <button onclick="downloadBundle()" class="text-xs font-semibold px-5 py-2 btn-primary-apple shadow-md">Exportar Projeto</button>
+            <input type="file" id="fileInput" class="hidden" accept=".html" onchange="handleImport(event)">
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden p-5 gap-5">
+        <section id="sec-editor" class="w-[40%] apple-glass rounded-2xl flex flex-col p-2 overflow-hidden border border-blue-100">
+            <div id="editor-container" class="flex-1 w-full"></div>
+        </section>
+
+        <section id="sec-preview" class="flex-1 flex flex-col gap-4">
+            <div class="flex items-center justify-between px-2">
+                <div class="flex gap-6 bg-white/80 backdrop-blur-md px-5 py-2 rounded-xl border border-blue-50 shadow-sm">
+                   <button onclick="setPreview('desktop')" class="text-2xl">💻</button>
+                   <button onclick="setPreview('tablet')" class="text-2xl">📟</button>
+                   <button onclick="setPreview('mobile')" class="text-2xl">📱</button>
+                </div>
+            </div>
+            <div id="preview-wrapper">
+                <div id="preview-container" class="device-desktop">
+                    <iframe id="preview"></iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function validateAuth() {
+            const input = document.getElementById('passInput');
+            if(["DOUGLAS", "S2"].includes(input.value)) {
+                document.getElementById('auth-overlay').remove();
+            } else { input.value = ""; }
+        }
+        document.getElementById('passInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') validateAuth(); });
+
+        let editor, currentLang = 'html', currentDevice = 'desktop';
+        let files = {
+            html: localStorage.getItem('wnet-html') || `
+<script src="https://cdn.tailwindcss.com"><\/script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background: #0a0a0c; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; }
+    .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8); }
+    .gradient-text { background: linear-gradient(135deg, #007aff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .float { animation: floating 4s ease-in-out infinite; }
+    @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+    .glow { position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,122,255,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; top: -150px; left: -150px; z-index: -1; pointer-events: none; }
+</style>
+
+<div class="relative w-full max-w-2xl mx-auto p-8">
+    <div class="glow"></div>
+    <div class="glass-card p-12 text-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#007aff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        
+        <div class="float mb-8 inline-block">
+            <div class="w-24 h-24 bg-gradient-to-tr from-[#007aff] to-[#00d4ff] rounded-[28%] flex items-center justify-center shadow-[0_0_40px_rgba(0,122,255,0.4)] mx-auto relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/20 blur-md rounded-full -top-10 -left-10 w-20 h-20"></div>
+                <svg width="44" height="44" viewBox="0 0 256 256" fill="white"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
+            </div>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+            Bem-vindo ao <span class="gradient-text">WNETStudio</span>
+        </h1>
+        
+        <p class="text-slate-400 text-lg max-w-md mx-auto mb-10 h-6" id="typewriter-text"></p>
+        
+        <div class="flex flex-wrap items-center justify-center gap-4 relative z-10">
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-[#007aff] font-mono font-bold text-sm">/&gt;</span>
+                <span class="text-sm font-medium text-slate-200">HTML</span>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-[#00d4ff] font-mono font-bold text-sm">{ }</span>
+                <span class="text-sm font-medium text-slate-200">CSS</span>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-1 transition-all cursor-pointer flex items-center gap-3">
+                <span class="text-yellow-400 font-mono font-bold text-sm">JS</span>
+                <span class="text-sm font-medium text-slate-200">JavaScript</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const text = "O futuro do seu código começa aqui.";
+    const el = document.getElementById('typewriter-text');
+    let i = 0;
+    function typeWriter() {
+        if (i < text.length) {
+            el.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, 40);
+        }
+    }
+    setTimeout(typeWriter, 600);
+<\/script>`,
+            css: localStorage.getItem('wnet-css') || '',
+            javascript: localStorage.getItem('wnet-js') || ''
+        };
+
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: files[currentLang],
+                language: 'html',
+                theme: 'vs',
+                automaticLayout: true,
+                fontSize: 14,
+                minimap: { enabled: false }
+            });
+            editor.onDidChangeModelContent(() => { 
+                files[currentLang] = editor.getValue(); 
+                updatePreview(); 
+            });
+            updatePreview();
+        });
+
+        function switchTab(lang) {
+            currentLang = lang;
+            monaco.editor.setModelLanguage(editor.getModel(), lang === 'javascript' ? 'javascript' : lang);
+            editor.setValue(files[lang]);
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${lang === 'javascript' ? 'js' : lang}`));
+        }
+
+        function updatePreview() {
+            const source = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
+            document.getElementById('preview').srcdoc = source;
+        }
+
+        function setPreview(type) {
+            currentDevice = type;
+            const container = document.getElementById('preview-container');
+            container.className = ''; 
+            setTimeout(() => {
+                if(type === 'mobile') container.classList.add('device-mobile');
+                else if(type === 'tablet') container.classList.add('device-tablet');
+                else container.classList.add('device-desktop');
+            }, 10);
+        }
+
+        function toggleFS(type) {
+            const el = document.getElementById(type === 'editor' ? 'sec-editor' : 'sec-preview');
+            const isFull = el.classList.contains(type === 'editor' ? 'editor-full' : 'preview-full');
+            document.querySelectorAll('.editor-full, .preview-full').forEach(e => e.classList.remove('editor-full', 'preview-full'));
+            if (!isFull) {
+                el.classList.add(type === 'editor' ? 'editor-full' : 'preview-full');
+            } else {
+                setPreview(currentDevice);
+            }
+            editor.layout();
+        }
+
+        function clearAll() { if(confirm("Deseja limpar todo o código?")) { editor.setValue(""); localStorage.clear(); updatePreview(); } }
+        function importFile() { document.getElementById('fileInput').click(); }
+        function handleImport(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const doc = new DOMParser().parseFromString(e.target.result, 'text/html');
+                files.html = doc.body.innerHTML;
+                editor.setValue(files[currentLang]); updatePreview();
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+        function selectAllCode() { editor.focus(); editor.setSelection(editor.getModel().getFullModelRange()); }
+        function downloadBundle() {
+            const content = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.javascript}<\/script></body></html>`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], {type: 'text/html'})); a.download = 'projeto_wnet.html'; a.click();
+        }
+    </script>
+</body>
+</html><script>// 1. Configurações de Elite para o Monaco Editor
+// Adicione estas opções dentro da função require(['vs/editor/editor.main']...)
+const editorOptions = {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 14,
+    lineHeight: 22,
+    letterSpacing: 0.5,
+    roundedSelection: true,
+    cursorSmoothCaretAnimation: "on", // Cursor desliza suavemente
+    cursorBlinking: "smooth",
+    smoothScrolling: true,
+    padding: { top: 20, bottom: 20 },
+    minimap: { enabled: true, scale: 0.75, side: 'right' }, // Minimap discreto
+    bracketPairColorization: { enabled: true }, // Cores em chaves/parênteses
+    formatOnPaste: true,
+    formatOnType: true,
+    fixedOverflowWidgets: true // Garante que sugestões fiquem acima do preview
+};
+
+// 2. Sistema de Notificação Apple-Style
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl z-[9999] 
+                      backdrop-blur-xl border border-white/20 text-sm font-medium transition-all duration-500 opacity-0 translate-y-4`;
+    
+    if(type === 'success') {
+        toast.classList.add('bg-white/80', 'text-black');
+        toast.innerHTML = `✓ ${message}`;
+    } else {
+        toast.classList.add('bg-red-500/90', 'text-white');
+        toast.innerHTML = `✕ ${message}`;
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-4'), 100);
+    
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4');
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+// 3. Auto-Save Inteligente (Debounce)
+let saveTimeout;
+editor.onDidChangeModelContent(() => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        files[currentLang] = editor.getValue();
+        localStorage.setItem(`wnet-${currentLang}`, files[currentLang]);
+        updatePreview();
+        
+        // Indicador visual discreto de "Salvo"
+        const dot = document.querySelector('.h-2.w-2.bg-white');
+        dot.classList.replace('bg-white', 'bg-green-400');
+        setTimeout(() => dot.classList.replace('bg-green-400', 'bg-white'), 1000);
+    }, 800);
+});
+
+// 4. Efeito de Hover nas Abas
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        showToast(`Editando ${btn.innerText}`, 'success');
+    });
+});
+
+// 5. Override no Download para Feedback
+const originalDownload = downloadBundle;
+downloadBundle = function() {
+    showToast("Exportando projeto...", "success");
+    originalDownload();
+};
+
+// 6. Melhoria na Troca de Dispositivos (Feedback Tátil)
+const originalSetPreview = setPreview;
+setPreview = function(type) {
+    originalSetPreview(type);
+    showToast(`Modo ${type.charAt(0).toUpperCase() + type.slice(1)} ativado`);
+};</script></body></html>
